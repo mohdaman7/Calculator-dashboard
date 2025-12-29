@@ -50,7 +50,9 @@ app.get("/health", (req, res) => {
   })
 })
 
-app.use('/',console.log("Server is running ............."))
+app.get("/", (req, res) => {
+  res.send("✅ API is working");
+});
 
 // 404 handler
 app.use((req, res) => {
