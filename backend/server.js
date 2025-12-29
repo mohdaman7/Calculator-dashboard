@@ -38,8 +38,9 @@ mongoose
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("❌ MongoDB connection error:", err))
 
-// Routes
+// Routes - support both /api and root paths
 app.use("/api", routes)
+app.use("/", routes)
 
 // Health check
 app.get("/health", (req, res) => {
