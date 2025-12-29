@@ -13,13 +13,13 @@ const app = express()
 // Security middleware
 app.use(helmet())
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // limit each IP to 500 requests per windowMs
-  message: { error: "Too many requests, please try again later." }
-})
-app.use("/api/", limiter)
+// Rate limiting - disabled for now
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 500,
+//   message: { error: "Too many requests, please try again later." }
+// })
+// app.use("/api/", limiter)
 
 // CORS configuration
 const corsOptions = {
