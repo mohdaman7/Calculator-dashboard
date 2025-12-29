@@ -53,13 +53,35 @@ router.delete("/:id", verifyToken, async (req, res) => {
 // Check phone number (public - for PWA/App verification)
 router.post("/verify", async (req, res) => {
   try {
-    const { phoneNumber, countryCode = "+91" } = req.body
+    const { phoneNumber, countryCode } = req.body
     
     if (!phoneNumber) {
       return res.status(400).json({ success: false, message: "Phone number is required" })
     }
 
-    const phone = await PhoneNumber.findOne({ phoneNumber, countryCode, status: "active" })
+    // Normalize phone number - keep only digits
+    const normalizedPhone = phoneNumber.replace(/\D/g, "")
+
+    let phone = null
+
+    // If countryCode is provided, search with it
+    if (countryCode) {
+      phone = await PhoneNumber.findOne({ phoneNumber: normalizedPhone, countryCode, status: "active" })
+    }
+    
+    // If not found or no countryCode provided, search by phone number only
+    if (!phone) {
+      phone = await PhoneNumber.findOne({ phoneNumber: normalizedPhone, status: "active" })
+    }
+
+    // Also try matching last 10 digits (for backward compatibility)
+    if (!phone && normalizedPhone.length >= 10) {
+      const last10 = normalizedPhone.slice(-10)
+      phone = await PhoneNumber.findOne({ 
+        phoneNumber: { $regex: last10 + "$" }, 
+        status: "active" 
+      })
+    }
 
     if (phone) {
       res.json({ 
@@ -67,7 +89,7 @@ router.post("/verify", async (req, res) => {
         whitelisted: true, 
         message: "Phone number is whitelisted",
         userName: phone.userName || null,
-        countryCode: phone.countryCode
+        countryCode: phone.countryCode || "+91"
       })
     } else {
       res.status(403).json({ 
