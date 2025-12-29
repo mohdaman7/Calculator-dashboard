@@ -1,6 +1,7 @@
 "use client"
 
-import { Phone, Shield } from "lucide-react"
+import Image from "next/image"
+import { Phone } from "lucide-react"
 
 export default function Sidebar({ currentView, onViewChange, stats = { total: 0, active: 0, inactive: 0 } }) {
   return (
@@ -8,8 +9,8 @@ export default function Sidebar({ currentView, onViewChange, stats = { total: 0,
       {/* Logo Section */}
       <div className="p-6 border-b border-white/5">
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 ring-1 ring-white/10">
-            <Shield className="h-6 w-6 text-white" />
+          <div className="h-12 w-12 rounded-2xl overflow-hidden shadow-lg shadow-blue-500/30 ring-1 ring-white/10">
+            <Image src="/logo.png" alt="Logo" width={48} height={48} className="object-cover" />
           </div>
           <div>
             <h1 className="font-bold text-white text-xl tracking-tight">Admin Panel</h1>

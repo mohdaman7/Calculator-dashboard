@@ -2,9 +2,10 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { authService } from "@/src/services/api/authService"
 import { Button } from "@/components/ui/button"
-import { Shield, Mail, Lock, Loader2 } from "lucide-react"
+import { Mail, Lock, Loader2 } from "lucide-react"
 
 export default function LoginForm({ onLoginSuccess }) {
   const router = useRouter()
@@ -39,8 +40,8 @@ export default function LoginForm({ onLoginSuccess }) {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30 mb-4">
-            <Shield className="h-8 w-8 text-white" />
+          <div className="inline-flex items-center justify-center h-20 w-20 rounded-2xl overflow-hidden shadow-xl shadow-blue-500/30 mb-4">
+            <Image src="/logo.png" alt="Logo" width={80} height={80} className="object-cover" />
           </div>
           <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
           <p className="text-slate-400 text-sm mt-1">Phone Whitelist Management</p>
