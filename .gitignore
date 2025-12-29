@@ -17,11 +17,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
-.env
-.env.local
-.env.*.local
-.env.example
 
 # vercel
 .vercel
@@ -32,7 +27,7 @@ next-env.d.ts
 
 # backend
 /backend/node_modules
-/backend/.env
+
 
 # IDE
 .vscode/
