@@ -17,8 +17,8 @@ router.get("/", verifyToken, async (req, res) => {
 // Add phone number (protected)
 router.post("/", verifyToken, async (req, res) => {
   try {
-    const { phoneNumber, userName } = req.body
-    const phone = await PhoneNumber.create({ phoneNumber, userName })
+    const { phoneNumber, userName, countryCode = "+91" } = req.body
+    const phone = await PhoneNumber.create({ phoneNumber, userName, countryCode })
     res.status(201).json(phone)
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -28,10 +28,10 @@ router.post("/", verifyToken, async (req, res) => {
 // Update phone number (protected)
 router.put("/:id", verifyToken, async (req, res) => {
   try {
-    const { phoneNumber, userName, status } = req.body
+    const { phoneNumber, userName, status, countryCode } = req.body
     const updatedPhone = await PhoneNumber.findByIdAndUpdate(
       req.params.id,
-      { phoneNumber, userName, status, updatedAt: new Date() },
+      { phoneNumber, userName, status, countryCode, updatedAt: new Date() },
       { new: true }
     )
     res.json(updatedPhone)
@@ -53,20 +53,21 @@ router.delete("/:id", verifyToken, async (req, res) => {
 // Check phone number (public - for PWA/App verification)
 router.post("/verify", async (req, res) => {
   try {
-    const { phoneNumber } = req.body
+    const { phoneNumber, countryCode = "+91" } = req.body
     
     if (!phoneNumber) {
       return res.status(400).json({ success: false, message: "Phone number is required" })
     }
 
-    const phone = await PhoneNumber.findOne({ phoneNumber, status: "active" })
+    const phone = await PhoneNumber.findOne({ phoneNumber, countryCode, status: "active" })
 
     if (phone) {
       res.json({ 
         success: true, 
         whitelisted: true, 
         message: "Phone number is whitelisted",
-        userName: phone.userName || null
+        userName: phone.userName || null,
+        countryCode: phone.countryCode
       })
     } else {
       res.status(403).json({ 

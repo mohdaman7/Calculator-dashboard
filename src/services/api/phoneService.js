@@ -4,7 +4,7 @@ const getToken = () => localStorage.getItem("adminToken")
 
 export const phoneService = {
   async getAllPhones() {
-    const response = await fetch(`${API_BASE_URL}/phones`, {
+    const response = await fetch(`${API_BASE_URL}/phone-numbers`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -18,7 +18,7 @@ export const phoneService = {
   },
 
   async getPhoneById(id) {
-    const response = await fetch(`${API_BASE_URL}/phones/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/phone-numbers/${id}`, {
       headers: {
         Authorization: `Bearer ${getToken()}`,
       },
@@ -32,7 +32,7 @@ export const phoneService = {
   },
 
   async addPhone(data) {
-    const response = await fetch(`${API_BASE_URL}/phones`, {
+    const response = await fetch(`${API_BASE_URL}/phone-numbers`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export const phoneService = {
   },
 
   async updatePhone(id, data) {
-    const response = await fetch(`${API_BASE_URL}/phones/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/phone-numbers/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export const phoneService = {
   },
 
   async deletePhone(id) {
-    const response = await fetch(`${API_BASE_URL}/phones/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/phone-numbers/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${getToken()}`,

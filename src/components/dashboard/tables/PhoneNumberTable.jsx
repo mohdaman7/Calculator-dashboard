@@ -11,8 +11,8 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
         <TableRow>
           <TableHead>Phone Number</TableHead>
           <TableHead>User Name</TableHead>
+          <TableHead>Country</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Added By</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -26,18 +26,18 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
         ) : (
           phones.map((phone) => (
             <TableRow key={phone._id}>
-              <TableCell className="font-mono">{phone.phoneNumber}</TableCell>
+              <TableCell className="font-mono">{phone.countryCode || "+91"} {phone.phoneNumber}</TableCell>
               <TableCell>{phone.userName}</TableCell>
+              <TableCell className="text-sm">{phone.countryCode || "+91"}</TableCell>
               <TableCell>
                 <span
                   className={`px-2 py-1 rounded text-sm font-medium ${
-                    phone.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                    phone.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  {phone.isActive ? "Active" : "Inactive"}
+                  {phone.status === "active" ? "Active" : "Inactive"}
                 </span>
               </TableCell>
-              <TableCell className="text-sm text-muted-foreground">{phone.addedBy?.name || "Unknown"}</TableCell>
               <TableCell className="space-x-2">
                 <Button size="sm" variant="outline" onClick={() => onEdit(phone)}>
                   <Edit2 className="w-4 h-4" />
