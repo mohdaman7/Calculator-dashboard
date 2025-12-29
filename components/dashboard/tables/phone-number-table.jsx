@@ -24,7 +24,8 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
@@ -104,6 +105,72 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-700/50">
+        {phones.map((phone) => (
+          <div key={phone._id} className="p-4 space-y-3">
+            {/* Header with phone number and actions */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <Phone className="h-4 w-4 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <span className="block font-mono font-semibold text-slate-900 dark:text-white tracking-wide truncate">
+                    {phone.phoneNumber}
+                  </span>
+                  <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                    <User className="h-3.5 w-3.5" />
+                    <span className="truncate">{phone.userName || "—"}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <Button
+                  onClick={() => onEdit(phone)}
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-600"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => onDelete(phone._id)}
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Status and date row */}
+            <div className="flex items-center justify-between gap-3">
+              {phone.status === "active" ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 ring-1 ring-green-500/20">
+                  <CheckCircle className="h-3 w-3" />
+                  Active
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500 ring-1 ring-slate-500/20">
+                  <XCircle className="h-3 w-3" />
+                  Inactive
+                </span>
+              )}
+              <div className="flex items-center gap-1.5 text-slate-500 text-xs">
+                <Calendar className="h-3.5 w-3.5" />
+                {new Date(phone.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric"
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
