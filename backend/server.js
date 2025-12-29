@@ -50,10 +50,13 @@ app.get("/health", (req, res) => {
   })
 })
 
+app.use('/',console.log("Server is running ............."))
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" })
 })
+
 
 // Error handler
 app.use((err, req, res, next) => {
