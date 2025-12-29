@@ -47,9 +47,12 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
                     <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                       <Phone className="h-4 w-4 text-white" />
                     </div>
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white tracking-wide">
-                      {phone.phoneNumber}
-                    </span>
+                    <div>
+                      <span className="font-mono font-semibold text-slate-900 dark:text-white tracking-wide">
+                        {phone.countryCode || "+91"} {phone.phoneNumber}
+                      </span>
+                      <span className="block text-xs text-slate-500">{phone.countryCode || "+91"}</span>
+                    </div>
                   </div>
                 </td>
                 <td className="py-4 px-6">
@@ -119,7 +122,7 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
                 </div>
                 <div className="min-w-0">
                   <span className="block font-mono font-semibold text-slate-900 dark:text-white tracking-wide truncate">
-                    {phone.phoneNumber}
+                    {phone.countryCode || "+91"} {phone.phoneNumber}
                   </span>
                   <div className="flex items-center gap-1.5 text-sm text-slate-500">
                     <User className="h-3.5 w-3.5" />
