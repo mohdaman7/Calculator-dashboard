@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import PhoneNumberForm from "../forms/phone-number-form"
 import PhoneNumberTable from "../tables/phone-number-table"
-import { Plus, Phone, CheckCircle, XCircle, RefreshCw } from "lucide-react"
+import { Plus, Phone, CheckCircle, XCircle, RefreshCw, Search, X, Filter } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
@@ -14,6 +14,8 @@ export default function PhoneNumbersView({ onDataChange }) {
   const [error, setError] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [editingPhone, setEditingPhone] = useState(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
 
   const getToken = () => {
     if (typeof window !== "undefined") {
@@ -93,80 +95,168 @@ export default function PhoneNumbersView({ onDataChange }) {
     }
   }
 
+  // Filter and search logic
+  const filteredPhones = useMemo(() => {
+    return phoneNumbers.filter((phone) => {
+      const matchesSearch = searchQuery === "" || 
+        phone.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        phone.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        phone.countryCode?.includes(searchQuery)
+      
+      const matchesStatus = statusFilter === "all" || phone.status === statusFilter
+      
+      return matchesSearch && matchesStatus
+    })
+  }, [phoneNumbers, searchQuery, statusFilter])
+
   const stats = {
     total: phoneNumbers.length,
     active: phoneNumbers.filter((p) => p.status === "active").length,
     inactive: phoneNumbers.filter((p) => p.status === "inactive").length,
   }
 
+  const clearSearch = () => {
+    setSearchQuery("")
+    setStatusFilter("all")
+  }
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div className="space-y-4 max-w-6xl mx-auto">
+      {/* Compact Stats Row */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Total Numbers</p>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.total}</p>
+              <p className="text-xs font-medium text-slate-500">Total</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Phone className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+              <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Active</p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.active}</p>
+              <p className="text-xs font-medium text-slate-500">Active</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active}</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+            <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Inactive</p>
-              <p className="text-3xl font-bold text-slate-400 mt-1">{stats.inactive}</p>
+              <p className="text-xs font-medium text-slate-500">Inactive</p>
+              <p className="text-2xl font-bold text-slate-400">{stats.inactive}</p>
             </div>
-            <div className="h-12 w-12 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-              <XCircle className="h-6 w-6 text-slate-400" />
+            <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+              <XCircle className="h-5 w-5 text-slate-400" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Phone Numbers</h2>
-          <p className="text-sm text-slate-500">Add and manage whitelisted numbers</p>
+      {/* Search & Actions Bar */}
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3">
+        <div className="flex flex-col lg:flex-row gap-3">
+          {/* Search Input */}
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by phone number or name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-10 pl-10 pr-10 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-500"
+              >
+                <X className="h-3 w-3 text-slate-500 dark:text-slate-300" />
+              </button>
+            )}
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex items-center gap-2">
+            <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+              <button
+                onClick={() => setStatusFilter("all")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  statusFilter === "all"
+                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setStatusFilter("active")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  statusFilter === "active"
+                    ? "bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setStatusFilter("inactive")}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  statusFilter === "inactive"
+                    ? "bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-300 shadow-sm"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                }`}
+              >
+                Inactive
+              </button>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={fetchPhoneNumbers}
+              variant="outline"
+              size="sm"
+              className="h-10 rounded-lg"
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            </Button>
+            <Button
+              onClick={() => {
+                setEditingPhone(null)
+                setShowForm(true)
+              }}
+              size="sm"
+              className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Number
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={fetchPhoneNumbers}
-            variant="outline"
-            size="sm"
-            className="rounded-xl"
-            disabled={isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button
-            onClick={() => {
-              setEditingPhone(null)
-              setShowForm(true)
-            }}
-            size="sm"
-            className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Number
-          </Button>
-        </div>
+
+        {/* Active filters indicator */}
+        {(searchQuery || statusFilter !== "all") && (
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
+            <span className="text-xs text-slate-500">Showing {filteredPhones.length} of {phoneNumbers.length}</span>
+            {(searchQuery || statusFilter !== "all") && (
+              <button
+                onClick={clearSearch}
+                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Form */}
@@ -183,22 +273,34 @@ export default function PhoneNumbersView({ onDataChange }) {
 
       {/* Error */}
       {error && (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm">
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
           {error}
         </div>
       )}
 
       {/* Table */}
       {isLoading ? (
-        <div className="bg-white dark:bg-slate-800 rounded-2xl p-12 shadow-sm border border-slate-200 dark:border-slate-700">
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 shadow-sm border border-slate-200 dark:border-slate-700">
           <div className="flex flex-col items-center justify-center">
-            <div className="h-10 w-10 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin"></div>
-            <p className="mt-4 text-slate-500">Loading phone numbers...</p>
+            <div className="h-8 w-8 rounded-full border-3 border-blue-500/20 border-t-blue-500 animate-spin"></div>
+            <p className="mt-3 text-slate-500 text-sm">Loading...</p>
           </div>
+        </div>
+      ) : filteredPhones.length === 0 && (searchQuery || statusFilter !== "all") ? (
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 text-center">
+          <Search className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+          <p className="text-slate-600 dark:text-slate-400 font-medium">No results found</p>
+          <p className="text-slate-400 text-sm mt-1">Try adjusting your search or filter</p>
+          <button
+            onClick={clearSearch}
+            className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Clear filters
+          </button>
         </div>
       ) : (
         <PhoneNumberTable
-          phones={phoneNumbers}
+          phones={filteredPhones}
           onEdit={(phone) => {
             setEditingPhone(phone)
             setShowForm(true)
