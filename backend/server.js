@@ -22,12 +22,36 @@ app.use(helmet())
 // app.use("/api/", limiter)
 
 // CORS configuration
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}
-app.use(cors(corsOptions))
+const allowedOrigins = [
+  "*",
+  "https://dashboard.epiccalculator.in",
+  "https://epiccalculator.in",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://api.epiccalculator.in",
+  "https://vendor.epiccalculator.in"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow Postman / server requests
+      if (!origin) return callback(null, true);
+
+      // allow all (*) or listed domains
+      if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
+
+// preflight
+app.options("*", cors());
 
 // Body parser
 app.use(express.json({ limit: "10kb" }))
