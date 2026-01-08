@@ -63,6 +63,18 @@ export default function PhoneNumbersView({ onDataChange }) {
   }
 
   const handleAddOrEdit = async (formData) => {
+    // Check for duplicates
+    const isDuplicate = phoneNumbers.some(p =>
+      p.phoneNumber === formData.phoneNumber &&
+      p.countryCode === formData.countryCode &&
+      (!editingPhone || p._id !== editingPhone._id)
+    )
+
+    if (isDuplicate) {
+      setError(`Phone number ${formData.countryCode} ${formData.phoneNumber} is already added`)
+      return
+    }
+
     try {
       if (editingPhone) {
         const response = await fetch(`${API_URL}/phone-numbers/${editingPhone._id}`, {
@@ -89,6 +101,7 @@ export default function PhoneNumbersView({ onDataChange }) {
       }
       setShowForm(false)
       setEditingPhone(null)
+      setError("") // Clear error on success
       if (onDataChange) onDataChange()
     } catch (err) {
       setError("Failed to save phone number")
@@ -98,13 +111,13 @@ export default function PhoneNumbersView({ onDataChange }) {
   // Filter and search logic
   const filteredPhones = useMemo(() => {
     return phoneNumbers.filter((phone) => {
-      const matchesSearch = searchQuery === "" || 
+      const matchesSearch = searchQuery === "" ||
         phone.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         phone.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         phone.countryCode?.includes(searchQuery)
-      
+
       const matchesStatus = statusFilter === "all" || phone.status === statusFilter
-      
+
       return matchesSearch && matchesStatus
     })
   }, [phoneNumbers, searchQuery, statusFilter])
@@ -187,31 +200,28 @@ export default function PhoneNumbersView({ onDataChange }) {
             <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <button
                 onClick={() => setStatusFilter("all")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  statusFilter === "all"
-                    ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "all"
+                  ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
               >
                 All
               </button>
               <button
                 onClick={() => setStatusFilter("active")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  statusFilter === "active"
-                    ? "bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "active"
+                  ? "bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
               >
                 Active
               </button>
               <button
                 onClick={() => setStatusFilter("inactive")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  statusFilter === "inactive"
-                    ? "bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-300 shadow-sm"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                }`}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "inactive"
+                  ? "bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-300 shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
               >
                 Inactive
               </button>
@@ -233,6 +243,7 @@ export default function PhoneNumbersView({ onDataChange }) {
               onClick={() => {
                 setEditingPhone(null)
                 setShowForm(true)
+                setError("") // Clear any previous error
               }}
               size="sm"
               className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
@@ -267,6 +278,7 @@ export default function PhoneNumbersView({ onDataChange }) {
           onCancel={() => {
             setShowForm(false)
             setEditingPhone(null)
+            setError("") // Clear error on cancel
           }}
         />
       )}
@@ -304,6 +316,7 @@ export default function PhoneNumbersView({ onDataChange }) {
           onEdit={(phone) => {
             setEditingPhone(phone)
             setShowForm(true)
+            setError("") // Clear any previous error
           }}
           onDelete={handleDelete}
         />
