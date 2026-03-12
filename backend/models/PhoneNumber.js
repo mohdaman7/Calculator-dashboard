@@ -4,6 +4,7 @@ const phoneNumberSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   countryCode: { type: String, default: "+91" },
   userName: String,
+  email: { type: String, required: false, trim: true, lowercase: true },
   status: { type: String, enum: ["active", "inactive"], default: "active" },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

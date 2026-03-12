@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Phone, User, CheckCircle, XCircle, X, ChevronDown } from "lucide-react"
+import { Phone, User, CheckCircle, XCircle, X, ChevronDown, Mail } from "lucide-react"
 
 const COUNTRY_CODES = [
   { code: "+91", country: "India", flag: "🇮🇳" },
@@ -49,6 +49,7 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     phoneNumber: "",
     userName: "",
+    email: "",
     countryCode: "+91",
     status: "active",
   })
@@ -58,6 +59,7 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
       setFormData({
         phoneNumber: phone.phoneNumber,
         userName: phone.userName || "",
+        email: phone.email || "",
         countryCode: phone.countryCode || "+91",
         status: phone.status || "active",
       })
@@ -149,6 +151,23 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
             />
           </div>
 
+          {/* Email Address */}
+          <div className="flex-1 min-w-[180px]">
+            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
+              Email Address (Optional)
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="email@example.com"
+                className="w-full h-10 pl-9 pr-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400"
+              />
+            </div>
+          </div>
+
           {/* Status */}
           <div className="w-24">
             <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
@@ -178,8 +197,8 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               size="sm"
               className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >

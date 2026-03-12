@@ -17,8 +17,8 @@ router.get("/", verifyToken, async (req, res) => {
 // Add phone number (protected)
 router.post("/", verifyToken, async (req, res) => {
   try {
-    const { phoneNumber, userName, countryCode = "+91" } = req.body
-    const phone = await PhoneNumber.create({ phoneNumber, userName, countryCode })
+    const { phoneNumber, userName, email, countryCode = "+91" } = req.body
+    const phone = await PhoneNumber.create({ phoneNumber, userName, email, countryCode })
     res.status(201).json(phone)
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -28,10 +28,10 @@ router.post("/", verifyToken, async (req, res) => {
 // Update phone number (protected)
 router.put("/:id", verifyToken, async (req, res) => {
   try {
-    const { phoneNumber, userName, status, countryCode } = req.body
+    const { phoneNumber, userName, email, status, countryCode } = req.body
     const updatedPhone = await PhoneNumber.findByIdAndUpdate(
       req.params.id,
-      { phoneNumber, userName, status, countryCode, updatedAt: new Date() },
+      { phoneNumber, userName, email, status, countryCode, updatedAt: new Date() },
       { new: true }
     )
     res.json(updatedPhone)
@@ -54,7 +54,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 router.post("/verify", async (req, res) => {
   try {
     const { phoneNumber, countryCode } = req.body
-    
+
     if (!phoneNumber) {
       return res.status(400).json({ success: false, message: "Phone number is required" })
     }
@@ -68,7 +68,7 @@ router.post("/verify", async (req, res) => {
     if (countryCode) {
       phone = await PhoneNumber.findOne({ phoneNumber: normalizedPhone, countryCode, status: "active" })
     }
-    
+
     // If not found or no countryCode provided, search by phone number only
     if (!phone) {
       phone = await PhoneNumber.findOne({ phoneNumber: normalizedPhone, status: "active" })
@@ -77,25 +77,26 @@ router.post("/verify", async (req, res) => {
     // Also try matching last 10 digits (for backward compatibility)
     if (!phone && normalizedPhone.length >= 10) {
       const last10 = normalizedPhone.slice(-10)
-      phone = await PhoneNumber.findOne({ 
-        phoneNumber: { $regex: last10 + "$" }, 
-        status: "active" 
+      phone = await PhoneNumber.findOne({
+        phoneNumber: { $regex: last10 + "$" },
+        status: "active"
       })
     }
 
     if (phone) {
-      res.json({ 
-        success: true, 
-        whitelisted: true, 
+      res.json({
+        success: true,
+        whitelisted: true,
         message: "Phone number is whitelisted",
         userName: phone.userName || null,
+        email: phone.email || null,
         countryCode: phone.countryCode || "+91"
       })
     } else {
-      res.status(403).json({ 
-        success: false, 
-        whitelisted: false, 
-        message: "Phone number is not whitelisted" 
+      res.status(403).json({
+        success: false,
+        whitelisted: false,
+        message: "Phone number is not whitelisted"
       })
     }
   } catch (error) {

@@ -114,6 +114,7 @@ export default function PhoneNumbersView({ onDataChange }) {
       const matchesSearch = searchQuery === "" ||
         phone.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         phone.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        phone.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         phone.countryCode?.includes(searchQuery)
 
       const matchesStatus = statusFilter === "all" || phone.status === statusFilter

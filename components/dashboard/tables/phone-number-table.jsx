@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Phone, Edit2, Trash2, CheckCircle, XCircle, Calendar, User } from "lucide-react"
+import { Phone, Edit2, Trash2, CheckCircle, XCircle, Calendar, User, Mail } from "lucide-react"
 
 export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
   if (phones.length === 0) {
@@ -29,6 +29,7 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
             <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
               <th className="text-left py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider">Phone Number</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider">Name</th>
+              <th className="text-left py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider">Email</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider">Status</th>
               <th className="text-left py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider">Added</th>
               <th className="text-center py-3 px-4 font-semibold text-slate-600 dark:text-slate-300 text-xs uppercase tracking-wider w-24">Actions</th>
@@ -36,8 +37,8 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
             {phones.map((phone) => (
-              <tr 
-                key={phone._id} 
+              <tr
+                key={phone._id}
                 className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors"
               >
                 <td className="py-3 px-4">
@@ -52,6 +53,12 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
                 </td>
                 <td className="py-3 px-4">
                   <span className="text-slate-700 dark:text-slate-300 text-sm">{phone.userName || "—"}</span>
+                </td>
+                <td className="py-3 px-4">
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
+                    {phone.email && <Mail className="h-3 w-3" />}
+                    <span className="text-sm truncate max-w-[150px]">{phone.email || "—"}</span>
+                  </div>
                 </td>
                 <td className="py-3 px-4">
                   {phone.status === "active" ? (
@@ -114,7 +121,15 @@ export default function PhoneNumberTable({ phones, onEdit, onDelete }) {
                   <span className="block font-mono font-medium text-slate-900 dark:text-white text-sm truncate">
                     {phone.countryCode || "+91"} {phone.phoneNumber}
                   </span>
-                  <span className="text-xs text-slate-500">{phone.userName || "No name"}</span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-xs text-slate-500">{phone.userName || "No name"}</span>
+                    {phone.email && (
+                      <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                        <Mail className="h-2.5 w-2.5" />
+                        <span>{phone.email}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-1 shrink-0">
