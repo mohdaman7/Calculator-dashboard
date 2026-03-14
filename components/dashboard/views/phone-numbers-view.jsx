@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import PhoneNumberForm from "../forms/phone-number-form"
 import PhoneNumberTable from "../tables/phone-number-table"
-import { Plus, Phone, CheckCircle, XCircle, RefreshCw, Search, X, Filter } from "lucide-react"
+import { Plus, Phone, CheckCircle, XCircle, RefreshCw, Search, X, ShieldCheck, Zap } from "lucide-react"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
 
@@ -71,7 +71,7 @@ export default function PhoneNumbersView({ onDataChange }) {
     )
 
     if (isDuplicate) {
-      setError(`Phone number ${formData.countryCode} ${formData.phoneNumber} is already added`)
+      setError(`Phone number ${formData.countryCode} ${formData.phoneNumber} is already whitelisted`)
       return
     }
 
@@ -101,14 +101,13 @@ export default function PhoneNumbersView({ onDataChange }) {
       }
       setShowForm(false)
       setEditingPhone(null)
-      setError("") // Clear error on success
+      setError("")
       if (onDataChange) onDataChange()
     } catch (err) {
-      setError("Failed to save phone number")
+      setError("An error occurred while saving. Please try again.")
     }
   }
 
-  // Filter and search logic
   const filteredPhones = useMemo(() => {
     return phoneNumbers.filter((phone) => {
       const matchesSearch = searchQuery === "" ||
@@ -135,193 +134,205 @@ export default function PhoneNumbersView({ onDataChange }) {
   }
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto">
-      {/* Compact Stats Row */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12 animate-in fade-in duration-500">
+      {/* Premium Hub Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+            <ShieldCheck className="h-8 w-8 text-blue-600" />
+            Whitelist Management
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 font-medium">Control secure access for global team members</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={fetchPhoneNumbers}
+            variant="outline"
+            size="icon"
+            className="h-11 w-11 rounded-2xl bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`h-4.5 w-4.5 text-slate-500 ${isLoading ? "animate-spin" : ""}`} />
+          </Button>
+          <Button
+            onClick={() => {
+              setEditingPhone(null)
+              setShowForm(true)
+              setError("")
+            }}
+            className="h-11 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/25 transition-all active:scale-95"
+          >
+            <Plus className="h-5 w-5 mr-2" />
+            Add Whitelist Entry
+          </Button>
+        </div>
+      </div>
+
+      {/* Modern Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700/50 group">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+            <Phone className="h-24 w-24" />
+          </div>
+          <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500">Total</p>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Total Verified</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-black text-slate-900 dark:text-white leading-none">{stats.total}</p>
+                <span className="text-xs font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-full">GLOBAL</span>
+              </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Phone className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="h-14 w-14 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center border border-blue-100 dark:border-blue-800/50">
+              <Phone className="h-7 w-7 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
+
+        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700/50 group">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+            <ShieldCheck className="h-24 w-24" />
+          </div>
+          <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500">Active</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.active}</p>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Active Access</p>
+              <div className="flex items-baseline gap-2">
+                <p className="text-4xl font-black text-emerald-600 dark:text-emerald-400 leading-none">{stats.active}</p>
+                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+              </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+            <div className="h-14 w-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50">
+              <CheckCircle className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex items-center justify-between">
+
+        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700/50 group">
+          <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+            <Zap className="h-24 w-24" />
+          </div>
+          <div className="relative flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-slate-500">Inactive</p>
-              <p className="text-2xl font-bold text-slate-400">{stats.inactive}</p>
+              <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">Restricted</p>
+              <p className="text-4xl font-black text-slate-900 dark:text-slate-300 leading-none">{stats.inactive}</p>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-              <XCircle className="h-5 w-5 text-slate-400" />
+            <div className="h-14 w-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center border border-slate-200 dark:border-slate-600">
+              <XCircle className="h-7 w-7 text-slate-400" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search & Actions Bar */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-3">
-        <div className="flex flex-col lg:flex-row gap-3">
+      {/* Control Panel: Search & Filter */}
+      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 p-4 sticky top-4 z-10">
+        <div className="flex flex-col lg:flex-row gap-4">
           {/* Search Input */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <div className="flex-1 relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
             <input
               type="text"
-              placeholder="Search by phone number or name..."
+              placeholder="Filter by phone, name, or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-10 pr-10 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400"
+              className="w-full h-12 pl-12 pr-12 border-none rounded-2xl focus:outline-none bg-slate-100/50 dark:bg-slate-900/50 text-slate-900 dark:text-white font-medium text-sm placeholder:text-slate-400 transition-all ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-blue-500/50 shadow-inner"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-500"
+                className="absolute right-4 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-500 transition-colors"
               >
-                <X className="h-3 w-3 text-slate-500 dark:text-slate-300" />
+                <X className="h-3.5 w-3.5 text-slate-500 dark:text-slate-300" />
               </button>
             )}
           </div>
 
-          {/* Status Filter */}
-          <div className="flex items-center gap-2">
-            <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+          {/* Premium Filter Toggle */}
+          <div className="flex bg-slate-100/50 dark:bg-slate-900/50 rounded-2xl p-1.5 ring-1 ring-slate-200 dark:ring-slate-700">
+            {[
+              { id: "all", label: "All Members" },
+              { id: "active", label: "Active Only" },
+              { id: "inactive", label: "Restricted" }
+            ].map((tab) => (
               <button
-                onClick={() => setStatusFilter("all")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "all"
-                  ? "bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`px-5 py-2 text-xs font-bold rounded-xl transition-all duration-300 ${statusFilter === tab.id
+                  ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm scale-100"
+                  : "text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-white/50 dark:hover:bg-slate-800/50 scale-95"
                   }`}
               >
-                All
+                {tab.label}
               </button>
-              <button
-                onClick={() => setStatusFilter("active")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "active"
-                  ? "bg-white dark:bg-slate-600 text-green-600 dark:text-green-400 shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-              >
-                Active
-              </button>
-              <button
-                onClick={() => setStatusFilter("inactive")}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${statusFilter === "inactive"
-                  ? "bg-white dark:bg-slate-600 text-slate-600 dark:text-slate-300 shadow-sm"
-                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-              >
-                Inactive
-              </button>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <Button
-              onClick={fetchPhoneNumbers}
-              variant="outline"
-              size="sm"
-              className="h-10 rounded-lg"
-              disabled={isLoading}
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            </Button>
-            <Button
-              onClick={() => {
-                setEditingPhone(null)
-                setShowForm(true)
-                setError("") // Clear any previous error
-              }}
-              size="sm"
-              className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Add Number
-            </Button>
+            ))}
           </div>
         </div>
-
-        {/* Active filters indicator */}
-        {(searchQuery || statusFilter !== "all") && (
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100 dark:border-slate-700">
-            <span className="text-xs text-slate-500">Showing {filteredPhones.length} of {phoneNumbers.length}</span>
-            {(searchQuery || statusFilter !== "all") && (
-              <button
-                onClick={clearSearch}
-                className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
-              >
-                Clear filters
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Form */}
+      {/* Conditional Form Display with Motion */}
       {showForm && (
-        <PhoneNumberForm
-          phone={editingPhone}
-          onSubmit={handleAddOrEdit}
-          onCancel={() => {
-            setShowForm(false)
-            setEditingPhone(null)
-            setError("") // Clear error on cancel
-          }}
-        />
+        <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+          <PhoneNumberForm
+            phone={editingPhone}
+            onSubmit={handleAddOrEdit}
+            onCancel={() => {
+              setShowForm(false)
+              setEditingPhone(null)
+              setError("")
+            }}
+          />
+        </div>
       )}
 
-      {/* Error */}
+      {/* Error Toast-like Alert */}
       {error && (
-        <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+        <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-3xl text-rose-700 dark:text-rose-400 text-sm font-bold flex items-center gap-3 animate-in shake duration-300">
+          <div className="h-8 w-8 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center flex-shrink-0 text-rose-600">
+            <XCircle className="h-5 w-5" />
+          </div>
           {error}
         </div>
       )}
 
-      {/* Table */}
-      {isLoading ? (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-12 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col items-center justify-center">
-            <div className="h-8 w-8 rounded-full border-3 border-blue-500/20 border-t-blue-500 animate-spin"></div>
-            <p className="mt-3 text-slate-500 text-sm">Loading...</p>
+      {/* Main Content Area */}
+      <div className="relative">
+        {isLoading ? (
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-24 shadow-sm border border-slate-100 dark:border-slate-700/50">
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative">
+                <div className="h-16 w-16 rounded-full border-4 border-blue-500/10 border-t-blue-600 animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <ShieldCheck className="h-6 w-6 text-blue-600/50" />
+                </div>
+              </div>
+              <p className="mt-6 text-slate-500 dark:text-slate-400 font-bold tracking-widest text-xs uppercase">Establishing Connection...</p>
+            </div>
           </div>
-        </div>
-      ) : filteredPhones.length === 0 && (searchQuery || statusFilter !== "all") ? (
-        <div className="bg-white dark:bg-slate-800 rounded-xl p-8 shadow-sm border border-slate-200 dark:border-slate-700 text-center">
-          <Search className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">No results found</p>
-          <p className="text-slate-400 text-sm mt-1">Try adjusting your search or filter</p>
-          <button
-            onClick={clearSearch}
-            className="mt-3 text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Clear filters
-          </button>
-        </div>
-      ) : (
-        <PhoneNumberTable
-          phones={filteredPhones}
-          onEdit={(phone) => {
-            setEditingPhone(phone)
-            setShowForm(true)
-            setError("") // Clear any previous error
-          }}
-          onDelete={handleDelete}
-        />
-      )}
+        ) : filteredPhones.length === 0 ? (
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-16 shadow-sm border border-slate-100 dark:border-slate-700/50 text-center">
+            <div className="bg-slate-50 dark:bg-slate-900/50 h-20 w-20 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+              <Search className="h-10 w-10 text-slate-300" />
+            </div>
+            <p className="text-slate-900 dark:text-white font-black text-xl">No whitelist records matched</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 max-w-xs mx-auto font-medium">Your current search and filter settings did not return any results in our database.</p>
+            <button
+              onClick={clearSearch}
+              className="mt-8 px-6 py-2.5 text-sm bg-slate-900 dark:bg-slate-700 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-lg"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <PhoneNumberTable
+            phones={filteredPhones}
+            onEdit={(phone) => {
+              setEditingPhone(phone)
+              setShowForm(true)
+              setError("")
+              window.scrollTo({ top: 0, behavior: "smooth" })
+            }}
+            onDelete={handleDelete}
+          />
+        )}
+      </div>
     </div>
   )
 }

@@ -2,48 +2,22 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Phone, User, CheckCircle, XCircle, X, ChevronDown, Mail } from "lucide-react"
-
-const COUNTRY_CODES = [
-  { code: "+91", country: "India", flag: "🇮🇳" },
-  { code: "+1", country: "USA", flag: "🇺🇸" },
-  { code: "+44", country: "UK", flag: "🇬🇧" },
-  { code: "+971", country: "UAE", flag: "🇦🇪" },
-  { code: "+966", country: "Saudi", flag: "🇸🇦" },
-  { code: "+65", country: "Singapore", flag: "🇸🇬" },
-  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
-  { code: "+49", country: "Germany", flag: "🇩🇪" },
-  { code: "+33", country: "France", flag: "🇫🇷" },
-  { code: "+39", country: "Italy", flag: "🇮🇹" },
-  { code: "+81", country: "Japan", flag: "🇯🇵" },
-  { code: "+86", country: "China", flag: "🇨🇳" },
-  { code: "+82", country: "S.Korea", flag: "🇰🇷" },
-  { code: "+55", country: "Brazil", flag: "🇧🇷" },
-  { code: "+52", country: "Mexico", flag: "🇲🇽" },
-  { code: "+27", country: "S.Africa", flag: "🇿🇦" },
-  { code: "+234", country: "Nigeria", flag: "🇳🇬" },
-  { code: "+254", country: "Kenya", flag: "🇰🇪" },
-  { code: "+63", country: "Philippines", flag: "🇵🇭" },
-  { code: "+62", country: "Indonesia", flag: "🇮🇩" },
-  { code: "+84", country: "Vietnam", flag: "🇻🇳" },
-  { code: "+66", country: "Thailand", flag: "🇹🇭" },
-  { code: "+92", country: "Pakistan", flag: "🇵🇰" },
-  { code: "+880", country: "Bangladesh", flag: "🇧🇩" },
-  { code: "+94", country: "Sri Lanka", flag: "🇱🇰" },
-  { code: "+977", country: "Nepal", flag: "🇳🇵" },
-  { code: "+7", country: "Russia", flag: "🇷🇺" },
-  { code: "+34", country: "Spain", flag: "🇪🇸" },
-  { code: "+31", country: "Netherlands", flag: "🇳🇱" },
-  { code: "+41", country: "Switzerland", flag: "🇨🇭" },
-  { code: "+90", country: "Turkey", flag: "🇹🇷" },
-  { code: "+20", country: "Egypt", flag: "🇪🇬" },
-  { code: "+64", country: "New Zealand", flag: "🇳🇿" },
-  { code: "+974", country: "Qatar", flag: "🇶🇦" },
-  { code: "+973", country: "Bahrain", flag: "🇧🇭" },
-  { code: "+968", country: "Oman", flag: "🇴🇲" },
-  { code: "+965", country: "Kuwait", flag: "🇰🇼" },
-]
+import { Phone, User, X, ChevronDown, Mail, Check, Search } from "lucide-react"
+import { COUNTRIES } from "@/lib/countries"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { cn } from "@/lib/utils"
 
 export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
@@ -53,6 +27,7 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
     countryCode: "+91",
     status: "active",
   })
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     if (phone) {
@@ -75,134 +50,191 @@ export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
     onSubmit(formData)
   }
 
-  const selectedCountry = COUNTRY_CODES.find(c => c.code === formData.countryCode) || COUNTRY_CODES[0]
+  const selectedCountry = COUNTRIES.find(c => c.code === formData.countryCode) || COUNTRIES.find(c => c.code === "+91")
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-      {/* Compact Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-600 to-indigo-600">
-        <div className="flex items-center gap-2">
-          <Phone className="h-4 w-4 text-white" />
-          <h3 className="font-medium text-white text-sm">
-            {phone ? "Edit Number" : "Add New Number"}
-          </h3>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in duration-200 mb-6">
+      {/* Premium Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <Phone className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-base">
+              {phone ? "Edit Whitelisted Number" : "Add New Whitelisted Number"}
+            </h3>
+            <p className="text-blue-100 text-xs mt-0.5">
+              {phone ? "Update existing member access" : "Grant access to a new team member"}
+            </p>
+          </div>
         </div>
         <button
           onClick={onCancel}
-          className="h-6 w-6 rounded-md hover:bg-white/20 flex items-center justify-center transition-colors"
+          className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-all duration-200 outline-none"
         >
-          <X className="h-4 w-4 text-white" />
+          <X className="h-5 w-5 text-white" />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4">
-        <div className="flex flex-wrap items-end gap-3">
-          {/* Country Code - Compact */}
-          <div className="w-28">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
-              Country
+      <form onSubmit={handleSubmit} className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          {/* Country Selector - Searchable Popover */}
+          <div className="lg:col-span-3">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Country / Code
             </label>
-            <div className="relative">
-              <select
-                value={formData.countryCode}
-                onChange={(e) => setFormData((prev) => ({ ...prev, countryCode: e.target.value }))}
-                className="w-full h-10 pl-3 pr-7 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm cursor-pointer appearance-none"
-              >
-                {COUNTRY_CODES.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.flag} {country.code}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-            </div>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full h-11 justify-between bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all px-3"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-lg leading-none">{selectedCountry?.flag}</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{selectedCountry?.code}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs truncate">({selectedCountry?.name})</span>
+                  </div>
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0 shadow-2xl border-slate-200 dark:border-slate-700" align="start">
+                <Command>
+                  <CommandInput placeholder="Search country or code..." className="h-10" />
+                  <CommandList className="max-h-[300px]">
+                    <CommandEmpty>No country found.</CommandEmpty>
+                    <CommandGroup>
+                      {COUNTRIES.map((country) => (
+                        <CommandItem
+                          key={`${country.name}-${country.code}`}
+                          value={`${country.name} ${country.code}`}
+                          onSelect={() => {
+                            setFormData((prev) => ({ ...prev, countryCode: country.code }))
+                            setOpen(false)
+                          }}
+                          className="flex items-center justify-between py-2.5 px-3 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl leading-none">{country.flag}</span>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm text-slate-900 dark:text-white">{country.name}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">{country.code}</span>
+                            </div>
+                          </div>
+                          <Check
+                            className={cn(
+                              "h-4 w-4 text-blue-600",
+                              formData.countryCode === country.code ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
-          {/* Phone Number */}
-          <div className="flex-1 min-w-[180px]">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
+          {/* Phone Number Input */}
+          <div className="lg:col-span-4">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
               Phone Number
             </label>
-            <input
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "").slice(0, 15)
-                setFormData((prev) => ({ ...prev, phoneNumber: value }))
-              }}
-              placeholder="Enter phone number"
-              maxLength={15}
-              className="w-full h-10 px-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-mono text-sm placeholder:text-slate-400"
-              required
-            />
-          </div>
-
-          {/* User Name */}
-          <div className="flex-1 min-w-[140px]">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
-              Name (Optional)
-            </label>
-            <input
-              type="text"
-              value={formData.userName}
-              onChange={(e) => setFormData((prev) => ({ ...prev, userName: e.target.value }))}
-              placeholder="User name"
-              className="w-full h-10 px-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400"
-            />
-          </div>
-
-          {/* Email Address */}
-          <div className="flex-1 min-w-[180px]">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
-              Email Address (Optional)
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center group-focus-within:bg-blue-600 transition-colors">
+                <Phone className="h-3 w-3 text-blue-600 dark:text-blue-400 group-focus-within:text-white transition-colors" />
+              </div>
               <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                placeholder="email@example.com"
-                className="w-full h-10 pl-9 pr-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm placeholder:text-slate-400"
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 15)
+                  setFormData((prev) => ({ ...prev, phoneNumber: value }))
+                }}
+                placeholder="000 000 0000"
+                maxLength={15}
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-base tracking-widest placeholder:text-slate-400 transition-all shadow-sm"
+                required
               />
             </div>
           </div>
 
-          {/* Status */}
-          <div className="w-24">
-            <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">
-              Status
+          {/* User Name Input */}
+          <div className="lg:col-span-3 md:col-span-1">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Member Name
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-focus-within:bg-indigo-500 transition-colors">
+                <User className="h-3 w-3 text-slate-500 group-focus-within:text-white transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={formData.userName}
+                onChange={(e) => setFormData((prev) => ({ ...prev, userName: e.target.value }))}
+                placeholder="e.g. John Doe"
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Status Select */}
+          <div className="lg:col-span-2 md:col-span-1">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Access Status
             </label>
             <div className="relative">
               <select
                 value={formData.status}
                 onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
-                className="w-full h-10 pl-3 pr-7 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-sm cursor-pointer appearance-none"
+                className="w-full h-11 pl-4 pr-10 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm cursor-pointer appearance-none shadow-sm font-medium transition-all"
               >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="active">🟢 Active</option>
+                <option value="inactive">🔴 Restricted</option>
               </select>
-              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <ChevronDown className="h-4 w-4" />
+              </div>
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-2">
+          {/* Email Address - Full Width Row in grid */}
+          <div className="lg:col-span-8">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Email Address (Communication)
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-focus-within:bg-cyan-500 transition-colors">
+                <Mail className="h-3 w-3 text-slate-500 group-focus-within:text-white transition-colors" />
+              </div>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="user@organization.com"
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="lg:col-span-4 flex items-end gap-3">
             <Button
               type="button"
               onClick={onCancel}
               variant="outline"
-              size="sm"
-              className="h-10 px-4 rounded-lg"
+              className="flex-1 h-11 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              size="sm"
-              className="h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              className="flex-[1.5] h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
-              {phone ? "Update" : "Add"}
+              {phone ? "Apply Changes" : "Confirm & Whitelist"}
             </Button>
           </div>
         </div>

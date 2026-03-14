@@ -1,130 +1,244 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-const COUNTRY_CODES = [
-  { code: "+91", country: "India", flag: "🇮🇳" },
-  { code: "+1", country: "USA/Canada", flag: "🇺🇸" },
-  { code: "+44", country: "UK", flag: "🇬🇧" },
-  { code: "+971", country: "UAE", flag: "🇦🇪" },
-  { code: "+966", country: "Saudi Arabia", flag: "🇸🇦" },
-  { code: "+65", country: "Singapore", flag: "🇸🇬" },
-  { code: "+60", country: "Malaysia", flag: "🇲🇾" },
-  { code: "+61", country: "Australia", flag: "🇦🇺" },
-  { code: "+49", country: "Germany", flag: "🇩🇪" },
-  { code: "+33", country: "France", flag: "🇫🇷" },
-  { code: "+39", country: "Italy", flag: "🇮🇹" },
-  { code: "+81", country: "Japan", flag: "🇯🇵" },
-  { code: "+86", country: "China", flag: "🇨🇳" },
-  { code: "+82", country: "South Korea", flag: "🇰🇷" },
-  { code: "+55", country: "Brazil", flag: "🇧🇷" },
-  { code: "+52", country: "Mexico", flag: "🇲🇽" },
-  { code: "+27", country: "South Africa", flag: "🇿🇦" },
-  { code: "+234", country: "Nigeria", flag: "🇳🇬" },
-  { code: "+254", country: "Kenya", flag: "🇰🇪" },
-  { code: "+63", country: "Philippines", flag: "🇵🇭" },
-  { code: "+62", country: "Indonesia", flag: "🇮🇩" },
-  { code: "+84", country: "Vietnam", flag: "🇻🇳" },
-  { code: "+66", country: "Thailand", flag: "🇹🇭" },
-  { code: "+92", country: "Pakistan", flag: "🇵🇰" },
-  { code: "+880", country: "Bangladesh", flag: "🇧🇩" },
-  { code: "+94", country: "Sri Lanka", flag: "🇱🇰" },
-  { code: "+977", country: "Nepal", flag: "🇳🇵" },
-  { code: "+7", country: "Russia", flag: "🇷🇺" },
-  { code: "+34", country: "Spain", flag: "🇪🇸" },
-  { code: "+31", country: "Netherlands", flag: "🇳🇱" },
-  { code: "+41", country: "Switzerland", flag: "🇨🇭" },
-  { code: "+46", country: "Sweden", flag: "🇸🇪" },
-  { code: "+47", country: "Norway", flag: "🇳🇴" },
-  { code: "+45", country: "Denmark", flag: "🇩🇰" },
-  { code: "+358", country: "Finland", flag: "🇫🇮" },
-  { code: "+48", country: "Poland", flag: "🇵🇱" },
-  { code: "+43", country: "Austria", flag: "🇦🇹" },
-  { code: "+32", country: "Belgium", flag: "🇧🇪" },
-  { code: "+353", country: "Ireland", flag: "🇮🇪" },
-  { code: "+351", country: "Portugal", flag: "🇵🇹" },
-  { code: "+30", country: "Greece", flag: "🇬🇷" },
-  { code: "+90", country: "Turkey", flag: "🇹🇷" },
-  { code: "+20", country: "Egypt", flag: "🇪🇬" },
-  { code: "+212", country: "Morocco", flag: "🇲🇦" },
-  { code: "+64", country: "New Zealand", flag: "🇳🇿" },
-  { code: "+972", country: "Israel", flag: "🇮🇱" },
-  { code: "+974", country: "Qatar", flag: "🇶🇦" },
-  { code: "+973", country: "Bahrain", flag: "🇧🇭" },
-  { code: "+968", country: "Oman", flag: "🇴🇲" },
-  { code: "+965", country: "Kuwait", flag: "🇰🇼" },
-]
+import { Phone, User, X, ChevronDown, Mail, Check, Search } from "lucide-react"
+import { COUNTRIES } from "@/lib/countries"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { cn } from "@/lib/utils"
 
 export default function PhoneNumberForm({ phone, onSubmit, onCancel }) {
-  const [phoneNumber, setPhoneNumber] = useState(phone?.phoneNumber || "")
-  const [userName, setUserName] = useState(phone?.userName || "")
-  const [countryCode, setCountryCode] = useState(phone?.countryCode || "+91")
-  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    phoneNumber: "",
+    userName: "",
+    email: "",
+    countryCode: "+91",
+    status: "active",
+  })
+  const [open, setOpen] = useState(false)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      await onSubmit({ phoneNumber, userName, countryCode })
-      setPhoneNumber("")
-      setUserName("")
-      setCountryCode("+91")
-    } finally {
-      setIsLoading(false)
+  useEffect(() => {
+    if (phone) {
+      setFormData({
+        phoneNumber: phone.phoneNumber,
+        userName: phone.userName || "",
+        email: phone.email || "",
+        countryCode: phone.countryCode || "+91",
+        status: phone.status || "active",
+      })
     }
+  }, [phone])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (formData.phoneNumber.length < 5) {
+      alert("Please enter a valid phone number")
+      return
+    }
+    onSubmit(formData)
   }
 
+  const selectedCountry = COUNTRIES.find(c => c.code === formData.countryCode) || COUNTRIES.find(c => c.code === "+91")
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-secondary rounded-lg border border-border">
-      <div className="space-y-2">
-        <Label htmlFor="countryCode">Country Code</Label>
-        <Select value={countryCode} onValueChange={setCountryCode} disabled={isLoading}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select country" />
-          </SelectTrigger>
-          <SelectContent className="max-h-60">
-            {COUNTRY_CODES.map((country) => (
-              <SelectItem key={country.code} value={country.code}>
-                {country.flag} {country.code} ({country.country})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden animate-in fade-in zoom-in duration-200 mb-6 font-sans">
+      {/* Premium Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-500">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center backdrop-blur-sm">
+            <Phone className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-base">
+              {phone ? "Edit Whitelisted Number" : "Add New Whitelisted Number"}
+            </h3>
+            <p className="text-blue-100 text-xs mt-0.5">
+              {phone ? "Update existing member access" : "Grant access to a new team member"}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onCancel}
+          className="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-all duration-200 outline-none"
+        >
+          <X className="h-5 w-5 text-white" />
+        </button>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Phone Number</Label>
-        <Input
-          id="phoneNumber"
-          placeholder="Enter phone number (without country code)"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-          disabled={isLoading}
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="userName">User Name</Label>
-        <Input
-          id="userName"
-          placeholder="Enter user name"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          disabled={isLoading}
-          required
-        />
-      </div>
-      <div className="flex gap-2">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : phone ? "Update" : "Add"}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-      </div>
-    </form>
+
+      <form onSubmit={handleSubmit} className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6">
+          {/* Country Selector - Searchable Popover */}
+          <div className="lg:col-span-3">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Country / Code
+            </label>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full h-11 justify-between bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all px-3"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-lg leading-none">{selectedCountry?.flag}</span>
+                    <span className="font-medium text-slate-900 dark:text-white">{selectedCountry?.code}</span>
+                    <span className="text-slate-400 dark:text-slate-500 text-xs truncate">({selectedCountry?.name})</span>
+                  </div>
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[300px] p-0 shadow-2xl border-slate-200 dark:border-slate-700" align="start">
+                <Command>
+                  <CommandInput placeholder="Search country or code..." className="h-10" />
+                  <CommandList className="max-h-[300px]">
+                    <CommandEmpty>No country found.</CommandEmpty>
+                    <CommandGroup>
+                      {COUNTRIES.map((country) => (
+                        <CommandItem
+                          key={`${country.name}-${country.code}`}
+                          value={`${country.name} ${country.code}`}
+                          onSelect={() => {
+                            setFormData((prev) => ({ ...prev, countryCode: country.code }))
+                            setOpen(false)
+                          }}
+                          className="flex items-center justify-between py-2.5 px-3 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl leading-none">{country.flag}</span>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm text-slate-900 dark:text-white">{country.name}</span>
+                              <span className="text-xs text-slate-500 dark:text-slate-400">{country.code}</span>
+                            </div>
+                          </div>
+                          <Check
+                            className={cn(
+                              "h-4 w-4 text-blue-600",
+                              formData.countryCode === country.code ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Phone Number Input */}
+          <div className="lg:col-span-4">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Phone Number
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center group-focus-within:bg-blue-600 transition-colors">
+                <Phone className="h-3 w-3 text-blue-600 dark:text-blue-400 group-focus-within:text-white transition-colors" />
+              </div>
+              <input
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 15)
+                  setFormData((prev) => ({ ...prev, phoneNumber: value }))
+                }}
+                placeholder="000 000 0000"
+                maxLength={15}
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-base tracking-widest placeholder:text-slate-400 transition-all shadow-sm"
+                required
+              />
+            </div>
+          </div>
+
+          {/* User Name Input */}
+          <div className="lg:col-span-3 md:col-span-1">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Member Name
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-focus-within:bg-indigo-500 transition-colors">
+                <User className="h-3 w-3 text-slate-500 group-focus-within:text-white transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={formData.userName}
+                onChange={(e) => setFormData((prev) => ({ ...prev, userName: e.target.value }))}
+                placeholder="e.g. John Doe"
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Status Select */}
+          <div className="lg:col-span-2 md:col-span-1">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Access Status
+            </label>
+            <div className="relative">
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+                className="w-full h-11 pl-4 pr-10 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm cursor-pointer appearance-none shadow-sm font-medium transition-all"
+              >
+                <option value="active">🟢 Active</option>
+                <option value="inactive">🔴 Restricted</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                <ChevronDown className="h-4 w-4" />
+              </div>
+            </div>
+          </div>
+
+          {/* Email Address - Full Width Row in grid */}
+          <div className="lg:col-span-8">
+            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 block uppercase tracking-wider">
+              Email Address (Communication)
+            </label>
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-focus-within:bg-cyan-500 transition-colors">
+                <Mail className="h-3 w-3 text-slate-500 group-focus-within:text-white transition-colors" />
+              </div>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="user@organization.com"
+                className="w-full h-11 pl-11 pr-4 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-sm placeholder:text-slate-400 transition-all shadow-sm"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="lg:col-span-4 flex items-end gap-3">
+            <Button
+              type="button"
+              onClick={onCancel}
+              variant="outline"
+              className="flex-1 h-11 rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 font-medium transition-all"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="flex-[1.5] h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {phone ? "Apply Changes" : "Confirm & Whitelist"}
+            </Button>
+          </div>
+        </div>
+      </form>
+    </div>
   )
 }
